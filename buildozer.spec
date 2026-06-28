@@ -12,6 +12,7 @@ fullscreen = 0
 
 # Настройки Android (теперь в блоке [app])
 android.permissions = INTERNET
+android.sdk_build_tools_version = 34.0.0
 android.api = 33
 android.minapi = 24
 android.archs = arm64-v8a, armeabi-v7a
