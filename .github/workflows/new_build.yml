@@ -20,16 +20,20 @@ jobs:
           pip3 install --user --upgrade buildozer
           pip3 install --user --upgrade cython
 
-      # Вот эта магия решит проблему с лицензиями
-      - name: Accept Android Licenses
+      - name: Accept Licenses and Prepare SDK
         run: |
+          # Создаем структуру папок для SDK
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
+          # Принимаем все лицензии принудительно через 'yes'
+          # Используем путь к sdkmanager, который устанавливает Buildozer
           yes | sdkmanager --licenses || true
+          yes | sdkmanager --update || true
 
       - name: Build with Buildozer
         run: |
           export PATH=$PATH:~/.local/bin
+          # Запуск сборки
           buildozer android debug
 
       - name: Upload APK
@@ -37,3 +41,4 @@ jobs:
         with:
           name: AngerAI-APK
           path: bin/*.apk
+          
