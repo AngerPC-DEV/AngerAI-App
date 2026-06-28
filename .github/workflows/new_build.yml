@@ -13,31 +13,26 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
-
-      - name: Install Buildozer
-        run: |
           pip3 install --user --upgrade pip
           pip3 install --user --upgrade buildozer cython
 
-      - name: Manual SDK Setup
+      - name: Setup SDK & Licenses
         run: |
-          # Создаем структуру папок, которую ищет Buildozer
-          mkdir -p /home/runner/.buildozer/android/platform/android-sdk/build-tools/33.0.0
+          # Устанавливаем Android SDK через командную строку
+          # Это создает правильную структуру, которую Buildozer сам распознает
+          export ANDROID_HOME=/home/runner/android-sdk
+          mkdir -p $ANDROID_HOME/licenses
+          echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-license
+          echo -e "\n84831b9409646a918e30573bab4c9c91346d8613" >> $ANDROID_HOME/licenses/android-sdk-license
           
-          # Скачиваем Build-Tools 33.0.0 напрямую с серверов Google
-          wget -q https://dl.google.com/android/repository/build-tools_r33.0.0-linux.zip
-          unzip -q build-tools_r33.0.0-linux.zip -d /tmp/bt
-          mv /tmp/bt/android-13/* /home/runner/.buildozer/android/platform/android-sdk/build-tools/33.0.0/
-          
-          # Устанавливаем права
-          chmod +x /home/runner/.buildozer/android/platform/android-sdk/build-tools/33.0.0/aidl
+          # Указываем Buildozer-у где искать SDK
+          echo "android.sdk_path = $ANDROID_HOME" >> buildozer.spec
 
       - name: Build APK
-        env:
-          BUILDOZER_HOME: /home/runner/.buildozer
         run: |
           export PATH=$PATH:~/.local/bin
-          # Запуск сборки
+          # Запуск сборки: buildozer сам скачает build-tools, 
+          # если мы правильно указали путь к SDK
           buildozer android debug
 
       - name: Upload APK
