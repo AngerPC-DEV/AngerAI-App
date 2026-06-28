@@ -14,26 +14,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-pip git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
 
-      - name: Setup Buildozer
+      - name: Install Buildozer
         run: |
           pip3 install --user --upgrade pip
-          pip3 install --user --upgrade buildozer
-          pip3 install --user --upgrade cython
+          pip3 install --user --upgrade buildozer cython
 
-      - name: Accept Licenses and Prepare SDK
-        run: |
-          # Создаем структуру папок для SDK
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
-          # Принимаем все лицензии принудительно через 'yes'
-          # Используем путь к sdkmanager, который устанавливает Buildozer
-          yes | sdkmanager --licenses || true
-          yes | sdkmanager --update || true
-
-      - name: Build with Buildozer
+      - name: Build APK
+        env:
+          BUILDOZER_HOME: /home/runner/.buildozer
         run: |
           export PATH=$PATH:~/.local/bin
-          # Запуск сборки
+          # Магия: принудительно принимаем лицензии для всех компонентов
+          yes | buildozer android update || true
           buildozer android debug
 
       - name: Upload APK
@@ -41,4 +33,3 @@ jobs:
         with:
           name: AngerAI-APK
           path: bin/*.apk
-          
