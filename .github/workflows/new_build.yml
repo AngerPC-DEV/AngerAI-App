@@ -19,13 +19,18 @@ jobs:
           pip3 install --user --upgrade pip
           pip3 install --user --upgrade buildozer cython
 
-      - name: Pre-accept Licenses
+      - name: Manual SDK Setup
         run: |
-          mkdir -p ~/.android
-          echo '### License accepted' > ~/.android/repositories.cfg
-          mkdir -p /home/runner/.android/licenses/
-          echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > /home/runner/.android/licenses/android-sdk-license
-          echo -e "\n84831b9409646a918e30573bab4c9c91346d8613" >> /home/runner/.android/licenses/android-sdk-license
+          # Создаем структуру папок, которую ищет Buildozer
+          mkdir -p /home/runner/.buildozer/android/platform/android-sdk/build-tools/33.0.0
+          
+          # Скачиваем Build-Tools 33.0.0 напрямую с серверов Google
+          wget -q https://dl.google.com/android/repository/build-tools_r33.0.0-linux.zip
+          unzip -q build-tools_r33.0.0-linux.zip -d /tmp/bt
+          mv /tmp/bt/android-13/* /home/runner/.buildozer/android/platform/android-sdk/build-tools/33.0.0/
+          
+          # Устанавливаем права
+          chmod +x /home/runner/.buildozer/android/platform/android-sdk/build-tools/33.0.0/aidl
 
       - name: Build APK
         env:
