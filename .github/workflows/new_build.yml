@@ -9,7 +9,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install System Dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
@@ -19,13 +19,20 @@ jobs:
           pip3 install --user --upgrade pip
           pip3 install --user --upgrade buildozer cython
 
+      - name: Pre-accept Licenses
+        run: |
+          mkdir -p ~/.android
+          echo '### License accepted' > ~/.android/repositories.cfg
+          mkdir -p /home/runner/.android/licenses/
+          echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > /home/runner/.android/licenses/android-sdk-license
+          echo -e "\n84831b9409646a918e30573bab4c9c91346d8613" >> /home/runner/.android/licenses/android-sdk-license
+
       - name: Build APK
         env:
           BUILDOZER_HOME: /home/runner/.buildozer
         run: |
           export PATH=$PATH:~/.local/bin
-          # Магия: принудительно принимаем лицензии для всех компонентов
-          yes | buildozer android update || true
+          # Запуск сборки
           buildozer android debug
 
       - name: Upload APK
