@@ -9,7 +9,7 @@ requirements = python3,kivy
 orientation = portrait
 fullscreen = 0
 
-# Указываем фиксированные, стабильные версии
+# ЖЕСТКАЯ ФИКСАЦИЯ
 android.sdk_build_tools_version = 33.0.0
 android.api = 33
 android.minapi = 24
