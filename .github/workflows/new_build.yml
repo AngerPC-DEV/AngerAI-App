@@ -9,7 +9,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
@@ -29,21 +29,24 @@ jobs:
           echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-license
           echo -e "\n84831b9409646a918e30573bab4c9c91346d8613" >> $ANDROID_HOME/licenses/android-sdk-license
           
-          # Устанавливаем строго 33.0.0
+          # Устанавливаем компоненты
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;33.0.0" "ndk;25.1.8937393"
+
+      - name: Create Symbolic Links (THE FIX)
+        run: |
+          # Создаем структуру, которую Buildozer требует сам от себя
+          mkdir -p /home/runner/.buildozer/android/platform/android-sdk
+          # ССЫЛАЕМСЯ на наш рабочий SDK
+          ln -s /home/runner/android-sdk/build-tools /home/runner/.buildozer/android/platform/android-sdk/build-tools
+          ln -s /home/runner/android-sdk/platforms /home/runner/.buildozer/android/platform/android-sdk/platforms
+          ln -s /home/runner/android-sdk/platform-tools /home/runner/.buildozer/android/platform/android-sdk/platform-tools
+          ln -s /home/runner/android-sdk/ndk /home/runner/.buildozer/android/platform/android-sdk/ndk
 
       - name: Build APK
         env:
-          # ИНЪЕКЦИЯ ПУТЕЙ
           ANDROID_HOME: /home/runner/android-sdk
-          ANDROID_SDK_ROOT: /home/runner/android-sdk
-          ANDROID_NDK_HOME: /home/runner/android-sdk/ndk/25.1.8937393
-          BUILDOZER_HOME: /home/runner/.buildozer
         run: |
           export PATH=$PATH:~/.local/bin
-          # Удаляем старый конфиг, если он был
-          rm -rf .buildozer/android/platform/android-sdk
-          # Запуск сборки
           buildozer android debug
 
       - name: Upload APK
